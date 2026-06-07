@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>신민회 시뮬레이터 — 숙의민주주의 실험</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg2: #f7f7f5;
+    --bg3: #f0eeea;
+    --text: #1a1a18;
+    --text2: #6b6b67;
+    --text3: #9e9e99;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.22);
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --purple-50: #EEEDFE;
+    --purple-200: #AFA9EC;
+    --purple-500: #534AB7;
+    --purple-700: #3C3489;
+    --purple-900: #26215C;
+    --teal-50: #E1F5EE;
+    --teal-500: #1D9E75;
+    --teal-700: #0F6E56;
+    --green-50: #EAF3DE;
+    --green-400: #639922;
+    --green-600: #3B6D11;
+    --green-900: #173404;
+    --amber-50: #FAEEDA;
+    --amber-500: #BA7517;
+    --amber-700: #854F0B;
+    --red-50: #FCEBEB;
+    --red-400: #E24B4A;
+    --red-600: #A32D2D;
+    --coral-50: #FAECE7;
+    --coral-600: #993C1D;
+    --pink-50: #FBEAF0;
+    --pink-600: #993556;
+    --blue-50: #E6F1FB;
+    --blue-600: #185FA5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --bg2: #242422;
+      --bg3: #2c2c2a;
+      --text: #f0eeea;
+      --text2: #a0a09a;
+      --text3: #6b6b67;
+      --border: rgba(255,255,255,0.1);
+      --border2: rgba(255,255,255,0.2);
+      --purple-50: #26215C;
+      --purple-200: #534AB7;
+      --purple-500: #AFA9EC;
+      --purple-700: #CECBF6;
+      --purple-900: #EEEDFE;
+      --green-50: #173404;
+      --green-400: #97C459;
+      --green-600: #C0DD97;
+      --green-900: #EAF3DE;
+      --amber-50: #412402;
+      --amber-500: #EF9F27;
+      --amber-700: #FAC775;
+      --red-50: #501313;
+      --red-400: #F09595;
+      --red-600: #F7C1C1;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    background: var(--bg3);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--bg);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 24px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-inner {
+    max-width: 760px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px;
+  }
+  .logo {
+    font-size: 16px; font-weight: 600; color: var(--purple-500);
+    display: flex; align-items: center; gap: 8px; text-decoration: none;
+  }
+  .logo-sub { font-size: 12px; font-weight: 400; color: var(--text2); }
+  .header-badge {
+    font-size: 11px; padding: 3px 10px; border-radius: 99px;
+    background: var(--purple-50); color: var(--purple-500); font-weight: 500;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: var(--bg);
+    border-bottom: 0.5px solid var(--border);
+    padding: 48px 24px 40px;
+    text-align: center;
+  }
+  .hero-tag {
+    display: inline-block; font-size: 12px; font-weight: 500;
+    padding: 4px 12px; border-radius: 99px;
+    background: var(--purple-50); color: var(--purple-500);
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-size: 28px; font-weight: 700; color: var(--text);
+    line-height: 1.3; margin-bottom: 12px;
+  }
+  .hero h1 span { color: var(--purple-500); }
+  .hero p {
+    font-size: 15px; color: var(--text2); max-width: 480px;
+    margin: 0 auto 24px; line-height: 1.7;
+  }
+  .hero-chips {
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  }
+  .chip {
+    font-size: 12px; padding: 4px 12px; border-radius: 99px;
+    border: 0.5px solid var(--border2); color: var(--text2);
+    background: var(--bg2);
+  }
+
+  /* ── Main layout ── */
+  .main { max-width: 760px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  /* ── Phase bar ── */
+  .phase-bar {
+    display: flex; border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg); overflow: hidden;
+    margin-bottom: 24px; background: var(--bg2);
+  }
+  .ph {
+    flex: 1; padding: 10px 4px; text-align: center;
+    font-size: 11px; color: var(--text3);
+    border-right: 0.5px solid var(--border);
+    transition: background .3s, color .3s; line-height: 1.4; cursor: default;
+  }
+  .ph:last-child { border-right: none; }
+  .ph i { font-size: 16px; display: block; margin-bottom: 2px; }
+  .ph.active { background: var(--purple-50); color: var(--purple-900); font-weight: 500; }
+  .ph.done { background: var(--green-50); color: var(--green-900); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px; margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 13px; font-weight: 500; color: var(--text2);
+    margin-bottom: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .card-title i { font-size: 16px; }
+
+  /* ── Badges ── */
+  .badge {
+    font-size: 11px; padding: 2px 9px; border-radius: 99px;
+    background: var(--purple-50); color: var(--purple-500); font-weight: 500;
+  }
+  .badge.g { background: var(--green-50); color: var(--green-600); }
+  .badge.a { background: var(--amber-50); color: var(--amber-700); }
+  .badge.r { background: var(--red-50); color: var(--red-600); }
+  .badge.live {
+    background: var(--red-50); color: var(--red-600);
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse { 50% { opacity: .5; } }
+
+  /* ── Topic grid ── */
+  .topic-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 12px; margin-bottom: 20px;
+  }
+  @media (max-width: 480px) { .topic-grid { grid-template-columns: 1fr; } }
+  .topic-btn {
+    background: var(--bg);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 16px 12px; cursor: pointer; text-align: center;
+    transition: border-color .2s, background .2s;
+  }
+  .topic-btn:hover { background: var(--bg2); }
+  .topic-btn.sel { border: 2px solid var(--purple-500); background: var(--purple-50); }
+  .topic-btn .ticon { font-size: 26px; display: block; margin-bottom: 8px; }
+  .topic-btn .tname { font-size: 14px; font-weight: 600; color: var(--text); }
+  .topic-btn .tdesc { font-size: 12px; color: var(--text2); margin-top: 4px; line-height: 1.4; }
+
+  /* ── Citizen grid ── */
+  .cit-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  @media (max-width: 480px) { .cit-grid { grid-template-columns: repeat(3, 1fr); } }
+  .cit-card {
+    background: var(--bg2); border-radius: var(--radius-md);
+    padding: 10px 6px; text-align: center;
+    border: 0.5px solid var(--border);
+    opacity: 0; transform: translateY(6px);
+    animation: fadeUp .4s forwards;
+  }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+  .cit-av {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; margin: 0 auto 5px;
+  }
+  .cit-name { font-size: 12px; font-weight: 500; color: var(--text); }
+  .cit-info { font-size: 10px; color: var(--text2); margin-top: 1px; }
+
+  /* ── MP grid ── */
+  .mp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  @media (max-width: 480px) { .mp-grid { grid-template-columns: repeat(2, 1fr); } }
+  .mp-card {
+    background: var(--bg2); border-radius: var(--radius-md);
+    padding: 10px 8px; text-align: center;
+    border: 0.5px solid var(--border);
+    opacity: 0; animation: fadeUp .4s forwards;
+  }
+  .mp-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-bottom: 5px; }
+  .mp-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .mp-party { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  /* ── Speech ── */
+  .speech {
+    padding: 12px 14px; margin-bottom: 10px;
+    border-radius: var(--radius-md);
+    border-left: 3px solid transparent;
+    background: var(--bg2);
+  }
+  .speech.cs { border-left-color: var(--purple-500); }
+  .speech.ms { border-left-color: var(--teal-500); }
+  .sp-head {
+    font-size: 11px; color: var(--text2);
+    margin-bottom: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  }
+  .sp-head strong { color: var(--text); font-size: 13px; }
+  .sp-text { font-size: 13px; color: var(--text); line-height: 1.7; }
+
+  /* ── Stream text ── */
+  .stream { font-size: 13px; color: var(--text); line-height: 1.75; white-space: pre-wrap; min-height: 20px; }
+  .stream.cur::after { content: '▋'; animation: blink 1s step-end infinite; color: var(--purple-500); }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ── Meter ── */
+  .meter-wrap { margin: 14px 0; }
+  .meter-labels { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; color: var(--text2); }
+  .meter-bar {
+    height: 14px; background: var(--bg2);
+    border-radius: 99px; overflow: hidden;
+    border: 0.5px solid var(--border);
+  }
+  .meter-fill { height: 100%; border-radius: 99px; transition: width 1.5s ease; width: 0%; }
+  .meter-fill.pass { background: var(--green-400); }
+  .meter-fill.fail { background: var(--red-400); }
+  .meter-hint { font-size: 11px; color: var(--text3); margin-top: 5px; }
+
+  /* ── Stats ── */
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+  .stat { background: var(--bg2); border-radius: var(--radius-md); padding: 14px; text-align: center; }
+  .stat-v { font-size: 24px; font-weight: 600; color: var(--text); }
+  .stat-l { font-size: 11px; color: var(--text2); margin-top: 4px; }
+
+  /* ── Result ── */
+  .result-box { padding: 24px; border-radius: var(--radius-xl); text-align: center; margin-bottom: 16px; }
+  .result-box.pass { background: var(--green-50); border: 0.5px solid var(--green-400); }
+  .result-box.fail { background: var(--red-50); border: 0.5px solid var(--red-400); }
+  .ri { font-size: 36px; margin-bottom: 10px; }
+  .rt { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+  .rd { font-size: 14px; line-height: 1.7; }
+  .result-box.pass .rt, .result-box.pass .rd { color: var(--green-600); }
+  .result-box.fail .rt, .result-box.fail .rd { color: var(--red-600); }
+
+  /* ── Buttons ── */
+  .run-btn {
+    width: 100%; padding: 14px;
+    border-radius: var(--radius-lg);
+    background: var(--purple-500); color: #EEEDFE;
+    border: none; font-size: 15px; font-weight: 500;
+    cursor: pointer; transition: background .2s, opacity .2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .run-btn:hover:not(:disabled) { background: var(--purple-700); }
+  .run-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .reset-btn {
+    width: 100%; padding: 12px;
+    border-radius: var(--radius-md);
+    background: transparent; color: var(--text2);
+    border: 0.5px solid var(--border2);
+    font-size: 14px; cursor: pointer; margin-top: 12px;
+    transition: background .2s;
+  }
+  .reset-btn:hover { background: var(--bg2); }
+
+  /* ── Section visibility ── */
+  .sec { display: none; }
+  .sec.on { display: block; }
+
+  /* ── Log lines ── */
+  .log-line {
+    font-size: 12px; color: var(--text2);
+    padding: 4px 0; border-bottom: 0.5px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .log-line:last-child { border-bottom: none; }
+  .log-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── Draft note ── */
+  .draft-note {
+    margin-top: 12px; padding: 12px 14px;
+    background: var(--bg2); border-radius: var(--radius-md);
+    font-size: 13px; color: var(--text2);
+    border-left: 3px solid var(--purple-500);
+    line-height: 1.6;
+  }
+  .draft-note strong { color: var(--text); }
+
+  /* ── About section ── */
+  .about {
+    background: var(--bg); border: 0.5px solid var(--border);
+    border-radius: var(--radius-xl); padding: 24px; margin-bottom: 24px;
+  }
+  .about h2 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+  .about p { font-size: 13px; color: var(--text2); line-height: 1.75; margin-bottom: 10px; }
+  .about p:last-child { margin-bottom: 0; }
+  .flow-steps {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin: 16px 0;
+  }
+  @media (max-width: 480px) { .flow-steps { grid-template-columns: 1fr; } }
+  .flow-step {
+    background: var(--bg2); border-radius: var(--radius-md);
+    padding: 12px; border: 0.5px solid var(--border);
+  }
+  .flow-step .fs-num {
+    font-size: 11px; font-weight: 600; color: var(--purple-500);
+    margin-bottom: 4px;
+  }
+  .flow-step .fs-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+  .flow-step .fs-desc { font-size: 11px; color: var(--text2); line-height: 1.5; }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center; padding: 32px 24px;
+    border-top: 0.5px solid var(--border);
+    font-size: 12px; color: var(--text3);
+    background: var(--bg);
+  }
+  .footer a { color: var(--purple-500); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <a class="logo" href="#">
+      <i class="ti ti-users"></i>
+      신민회 시뮬레이터
+      <span class="logo-sub">숙의민주주의 실험</span>
+    </a>
+    <span class="header-badge">정치철학 모델 프로토타입</span>
+  </div>
+</header>
+
+<section class="hero">
+  <span class="hero-tag">Deliberative Democracy Model</span>
+  <h1>시민이 <span>직접 만드는</span> 입법 과정</h1>
+  <p>층화 무작위 추출로 선발된 25인의 시민이 숙의하고, 국회의원이 수렴하며, AI가 반영도를 감사하는 새로운 민주주의 모델 — <strong>신민회</strong>를 시뮬레이션합니다.</p>
+  <div class="hero-chips">
+    <span class="chip">🏛️ 숙의민주주의</span>
+    <span class="chip">🎲 층화 무작위 추출</span>
+    <span class="chip">🤖 AI 감사 시스템</span>
+    <span class="chip">📡 의원회의 생중계</span>
+  </div>
+</section>
+
+<main class="main">
+
+  <!-- 모델 소개 -->
+  <div class="about">
+    <h2>신민회 모델이란?</h2>
+    <p>기존 대의민주주의의 한계—시민 의견이 선거 이후 입법 과정에서 소외되는 문제—를 보완하기 위해 설계된 심의민주주의 보완 장치입니다. 2주 1회 운영되며, 무작위 추출 시민의 숙의 결과가 AI 감사를 통해 본회의 상정 여부를 결정합니다.</p>
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="fs-num">STEP 1–2</div>
+        <div class="fs-title">시민 추첨 → 숙의</div>
+        <div class="fs-desc">층화 무작위 추출 25인이 정책 주제를 숙의하고 공식 의견서를 채택</div>
+      </div>
+      <div class="flow-step">
+        <div class="fs-num">STEP 3</div>
+        <div class="fs-title">신민회의원회의</div>
+        <div class="fs-desc">국회의원들이 시민 의견서를 수렴해 토의. 전 과정 온라인 생중계</div>
+      </div>
+      <div class="flow-step">
+        <div class="fs-num">STEP 4–5</div>
+        <div class="fs-title">AI 감사 → 결과</div>
+        <div class="fs-desc">AI가 반영도 60% 이상 시 본회의 상정 허용. 미달 시 재소집·징계</div>
+      </div>
+    </div>
+    <p>이 시뮬레이터는 해당 모델을 실제로 체험할 수 있도록 구현한 인터랙티브 프로토타입입니다.</p>
+  </div>
+
+  <!-- Phase bar -->
+  <div class="phase-bar">
+    <div class="ph active" id="ph0"><i class="ti ti-list-check"></i>주제선택</div>
+    <div class="ph" id="ph1"><i class="ti ti-users"></i>시민추첨</div>
+    <div class="ph" id="ph2"><i class="ti ti-message-circle"></i>신민회<br>숙의</div>
+    <div class="ph" id="ph3"><i class="ti ti-building"></i>의원<br>회의</div>
+    <div class="ph" id="ph4"><i class="ti ti-robot"></i>AI감사</div>
+    <div class="ph" id="ph5"><i class="ti ti-gavel"></i>결과</div>
+  </div>
+
+  <!-- 0: 주제 선택 -->
+  <div class="sec on" id="s0">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-target"></i>정책 주제를 선택하세요</div>
+      <div class="topic-grid">
+        <div class="topic-btn" onclick="pick(0)">
+          <span class="ticon">🏠</span>
+          <div class="tname">청년 주거</div>
+          <div class="tdesc">공공임대 확대·주거비 지원 정책</div>
+        </div>
+        <div class="topic-btn" onclick="pick(1)">
+          <span class="ticon">🤖</span>
+          <div class="tname">AI 규제</div>
+          <div class="tdesc">AI 기본법·알고리즘 책임제</div>
+        </div>
+        <div class="topic-btn" onclick="pick(2)">
+          <span class="ticon">🌱</span>
+          <div class="tname">탄소세</div>
+          <div class="tdesc">탄소세 도입·산업 전환 지원</div>
+        </div>
+      </div>
+      <button class="run-btn" id="startBtn" onclick="goPhase1()" disabled>
+        <i class="ti ti-player-play"></i>주제를 선택해 시작하기
+      </button>
+    </div>
+  </div>
+
+  <!-- 1: 시민 추첨 -->
+  <div class="sec" id="s1">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-users"></i>층화 무작위 추출 — 시민 참여자<span class="badge">25명</span></div>
+      <div class="cit-grid" id="citGrid"></div>
+      <div style="margin-top:14px;padding-top:14px;border-top:0.5px solid var(--border);">
+        <div class="log-line"><div class="log-dot" style="background:var(--green-400);"></div>성별 균형: 남 13명 / 여 12명</div>
+        <div class="log-line"><div class="log-dot" style="background:var(--teal-500);"></div>지역 분포: 수도권 45% / 광역시 30% / 지방 25%</div>
+        <div class="log-line"><div class="log-dot" style="background:var(--purple-500);"></div>연령 분포: 20대 20% / 30~40대 40% / 50대 이상 40%</div>
+        <div class="log-line"><div class="log-dot" style="background:var(--amber-500);"></div>직업 분포: 직장인 / 자영업 / 학생 / 농업 / 무직 등</div>
+      </div>
+    </div>
+    <button class="run-btn" id="btn1" onclick="goPhase2()" disabled>
+      <i class="ti ti-arrow-right"></i>신민회 숙의 시작
+    </button>
+  </div>
+
+  <!-- 2: 시민 숙의 -->
+  <div class="sec" id="s2">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-message-circle"></i>신민회 숙의 발언록<span class="badge" id="spBadge">생성 중...</span></div>
+      <div id="spList"></div>
+    </div>
+    <div class="card" id="sumCard" style="display:none;">
+      <div class="card-title"><i class="ti ti-notes"></i>신민회 공식 의견서</div>
+      <div class="stream cur" id="sumText"></div>
+    </div>
+    <button class="run-btn" id="btn2" onclick="goPhase3()" disabled style="display:none;">
+      <i class="ti ti-building"></i>신민회의원회의로 이관
+    </button>
+  </div>
+
+  <!-- 3: 의원 회의 -->
+  <div class="sec" id="s3">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-building"></i>신민회의원회의 참석 의원<span class="badge g">8명</span></div>
+      <div class="mp-grid" id="mpGrid"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-broadcast"></i>온라인 생중계 — 의원 토의<span class="badge live">● LIVE</span></div>
+      <div id="debList"></div>
+    </div>
+    <button class="run-btn" id="btn3" onclick="goPhase4()" disabled style="display:none;">
+      <i class="ti ti-robot"></i>AI 감사 프로그램 실행
+    </button>
+  </div>
+
+  <!-- 4: AI 감사 -->
+  <div class="sec" id="s4">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-robot"></i>AI 감사 프로그램 — 텍스트 일치도 분석</div>
+      <div class="stat-row">
+        <div class="stat"><div class="stat-v" id="aScore">—</div><div class="stat-l">종합 반영도</div></div>
+        <div class="stat"><div class="stat-v" id="aKw">—</div><div class="stat-l">핵심 키워드 일치</div></div>
+        <div class="stat"><div class="stat-v" id="aSem">—</div><div class="stat-l">의미론적 유사도</div></div>
+      </div>
+      <div class="meter-wrap">
+        <div class="meter-labels">
+          <span>의견 반영 점수</span>
+          <span id="aPct" style="font-weight:600;">0%</span>
+        </div>
+        <div class="meter-bar"><div class="meter-fill" id="aBar"></div></div>
+        <div class="meter-hint">본회의 상정 기준선 60% &nbsp;|&nbsp; 판정 기준: 신민회 의견 ↔ 의원 토의 ↔ 법안 초안</div>
+      </div>
+      <div class="stream cur" id="aReason"></div>
+    </div>
+    <button class="run-btn" id="btn4" onclick="goPhase5()" disabled style="display:none;">
+      <i class="ti ti-gavel"></i>최종 결과 확인
+    </button>
+  </div>
+
+  <!-- 5: 결과 -->
+  <div class="sec" id="s5">
+    <div id="finalBox"></div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-clipboard-list"></i>시뮬레이션 종합 평가</div>
+      <div class="stream cur" id="finalText"></div>
+    </div>
+    <button class="reset-btn" onclick="reset()">
+      <i class="ti ti-refresh"></i>&nbsp;다른 주제로 다시 시뮬레이션
+    </button>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <p>신민회 모델 설계 · 오윤상 (숭실대학교 철학과) &nbsp;|&nbsp; 시뮬레이터 구현 · Claude (Anthropic)</p>
+  <p style="margin-top:6px;">본 시뮬레이터는 정치철학 수업 제안 모델을 인터랙티브 프로토타입으로 구현한 것입니다.</p>
+</footer>
+
+<script>
+const CITIZENS=[
+  {name:"김도현",age:"30대",region:"서울",job:"직장인"},
+  {name:"이수연",age:"20대",region:"경기",job:"대학생"},
+  {name:"박민준",age:"50대",region:"부산",job:"자영업자"},
+  {name:"최지아",age:"40대",region:"대구",job:"교사"},
+  {name:"정우성",age:"60대",region:"전남",job:"농업인"},
+  {name:"한소희",age:"30대",region:"인천",job:"간호사"},
+  {name:"윤서준",age:"20대",region:"광주",job:"대학생"},
+  {name:"오미래",age:"40대",region:"서울",job:"프리랜서"},
+  {name:"장현우",age:"50대",region:"경북",job:"공무원"},
+  {name:"신다은",age:"30대",region:"대전",job:"직장인"},
+  {name:"임재원",age:"40대",region:"충북",job:"자영업자"},
+  {name:"강예진",age:"20대",region:"서울",job:"대학생"},
+  {name:"조민석",age:"60대",region:"경남",job:"무직"},
+  {name:"백하늘",age:"30대",region:"울산",job:"직장인"},
+  {name:"서진호",age:"50대",region:"강원",job:"농업인"},
+  {name:"류아영",age:"40대",region:"서울",job:"주부"},
+  {name:"문성준",age:"30대",region:"경기",job:"직장인"},
+  {name:"나은별",age:"20대",region:"부산",job:"대학생"},
+  {name:"홍태양",age:"50대",region:"전북",job:"자영업자"},
+  {name:"권지수",age:"40대",region:"서울",job:"교사"},
+  {name:"남도훈",age:"60대",region:"충남",job:"무직"},
+  {name:"안세영",age:"30대",region:"인천",job:"간호사"},
+  {name:"고유진",age:"20대",region:"대구",job:"프리랜서"},
+  {name:"변민호",age:"50대",region:"경기",job:"공무원"},
+  {name:"표수정",age:"40대",region:"제주",job:"자영업자"}
+];
+
+const AV=[
+  {bg:"#EEEDFE",fg:"#534AB7"},{bg:"#E1F5EE",fg:"#0F6E56"},
+  {bg:"#FAECE7",fg:"#993C1D"},{bg:"#E6F1FB",fg:"#185FA5"},
+  {bg:"#FAEEDA",fg:"#854F0B"},{bg:"#FBEAF0",fg:"#993556"}
+];
+
+const PARTIES={
+  "민주당":"#185FA5","국민의힘":"#E24B4A",
+  "조국혁신당":"#1D9E75","개혁신당":"#BA7517"
+};
+
+const T=[
+  {
+    name:"청년 주거",bill:"청년 주거 안정 지원 법안 (가칭)",
+    speeches:[
+      {speaker:"이수연",age:"20대",region:"경기",job:"대학생",stance:"찬성",text:"월세 60만 원이 소득의 절반을 넘습니다. 공공임대 공급량을 지금의 세 배로 늘리지 않으면 청년 독립 자체가 불가능해집니다. 주거는 복지가 아니라 기본권입니다."},
+      {speaker:"강예진",age:"20대",region:"서울",job:"대학생",stance:"찬성",text:"전세 사기 피해자 대부분이 2030 청년이었습니다. 임차인 보호 규정을 강화하고 보증금 반환 보험 가입을 임대인 의무 사항으로 법제화해야 합니다."},
+      {speaker:"나은별",age:"20대",region:"부산",job:"대학생",stance:"조건부 찬성",text:"월세 보조금은 찬성하지만 재원 마련 방안이 불명확합니다. 건설사 분양 이익 환수세를 신설하거나 빈집 보유세를 올려 재원을 충당하는 방식을 병행해야 합니다."},
+      {speaker:"박민준",age:"50대",region:"부산",job:"자영업자",stance:"우려",text:"공공임대 확대가 민간 임대 시장을 위축시켜 오히려 공급 부족을 심화시킬 수 있습니다. 세제 혜택을 통해 민간 임대인을 적정 임대료 수준으로 유도하는 방식도 함께 검토해야 합니다."},
+      {speaker:"장현우",age:"50대",region:"경북",job:"공무원",stance:"조건부 찬성",text:"청년 주거 지원에는 동의하지만 수도권 집중이 더 심화될 수 있습니다. 지역 거점 도시 청년 주거 단지를 우선 조성해 지방 정착 인센티브와 연동하는 설계가 필요합니다."},
+      {speaker:"류아영",age:"40대",region:"서울",job:"주부",stance:"찬성",text:"자녀 세대의 주거 문제를 지켜보는 부모 입장에서, 청년 주거 불안이 혼인율·출산율 감소로 이어지는 구조는 명확합니다. 사회 재생산 관점에서 반드시 국가가 개입해야 합니다."},
+      {speaker:"정우성",age:"60대",region:"전남",job:"농업인",stance:"반대",text:"도시 청년만을 위한 주거 지원은 형평성 문제가 있습니다. 농촌 청년 정착 지원 예산은 매년 삭감되는 반면 도시 집중 지원이 반복되고 있습니다. 전국 균형 배분 원칙을 법에 명시해야 합니다."}
+    ],
+    summary:"신민회 25인은 청년 주거 불안이 단순한 경제 문제가 아닌 혼인·출산·지역 균형과 직결된 구조적 문제임을 인식하였다. 다수 의견은 공공임대 공급 확대와 임차인 보호 강화에 찬성하였으며, 재원 마련 방안의 투명한 공개, 수도권-지방 간 형평성 확보, 민간 임대 시장과의 균형을 조건으로 제시하였다. 신민회는 본 정책이 보편적 주거권 보장의 관점에서 입법화될 것을 촉구한다.",
+    debates:[
+      {speaker:"이재명",party:"민주당",text:"신민회 의견서에서 지적한 대로 청년 주거 불안은 저출생 위기와 직결된 국가 과제입니다. 공공임대 공급 목표를 현행 대비 200% 상향하고 청년 월세 보조금 상한을 30만 원으로 명시하는 조항을 법안에 반영할 것을 제안합니다."},
+      {speaker:"한동훈",party:"국민의힘",text:"공공 확대만으로는 한계가 있습니다. 신민회가 제기한 민간 시장 위축 우려는 타당합니다. 민간 임대 등록 사업자에게 세제 혜택을 부여하고 적정 임대료 준수를 조건으로 묶는 인센티브 구조가 필요합니다."},
+      {speaker:"강선우",party:"민주당",text:"시민 의견 중 전세 사기 피해 예방 조항이 누락된 점을 지적합니다. 임대인 보증보험 가입 의무화와 임차인 우선변제권 강화를 이번 법안에 반드시 포함시켜야 신민회 의견이 온전히 반영됩니다."},
+      {speaker:"권성동",party:"국민의힘",text:"재원 조달 방안 없는 지원 확대는 포퓰리즘입니다. 기존 주거복지기금 재편과 미활용 국유지 개발 방식으로 재원을 조달하는 대안을 제시합니다."},
+      {speaker:"조국",party:"조국혁신당",text:"신민회 의견 중 '주거는 기본권'이라는 표현이 반복된 것은 의미심장합니다. 헌법 제35조에 준하는 주거권 명시 조항을 본 법안 전문에 삽입할 것을 강력히 촉구합니다."},
+      {speaker:"이준석",party:"개혁신당",text:"지역 균형 배분 원칙에 대한 신민회 의견에 동의합니다. 청년 주거 지원 예산의 30% 이상을 비수도권에 의무 배정하는 조항을 삽입하면 지방 정착 인센티브와 시너지 효과를 낼 수 있습니다."},
+      {speaker:"김민석",party:"민주당",text:"신민회가 제시한 재원 불명확 우려를 해소하기 위해, 법안에 5년 단위 재정 계획 수립 및 국회 보고 의무를 명시하는 절차 조항을 추가하겠습니다."},
+      {speaker:"장동혁",party:"국민의힘",text:"지원 대상 소득 기준을 중위소득 150% 이하로 명확히 설정해 중산층 역차별 논란을 차단해야 합니다. 이는 신민회가 언급한 형평성 원칙과도 부합합니다."}
+    ],
+    bill_draft:"청년(19~39세, 중위소득 150% 이하)에 대한 공공임대 주택 공급을 현행 대비 200% 확대하고, 임대인 보증보험 가입 의무화 및 월 30만 원 한도의 월세 보조금 지급을 골자로 하며, 지원 예산의 30% 이상을 비수도권에 우선 배정한다.",
+    audit:{score:78,keyword:71,semantic:85,pass:true,reason:"판정: ✓ 본회의 상정 가능\n\n신민회 의견서의 핵심 요소인 공공임대 확대(200% 목표), 임차인 보호(보증보험 의무화), 재원 명시(5년 재정계획 보고), 지역 형평성(비수도권 30% 배정)이 의원 토의 및 법안 초안에 구체적 조항으로 반영되었음이 확인됩니다. '주거권' 명시 요구와 월세 보조금 상한선은 추가 반영되었고, 민간 시장 우려는 세제 인센티브 조항으로 수용되었습니다."},
+    final_summary:"이번 신민회 시뮬레이션은 청년 주거 안정 법안을 주제로 25인의 시민이 층화 무작위 추출을 통해 선발되어 숙의를 진행하고, 8인의 국회의원이 그 의견을 수렴·토의하는 전 과정을 재현했습니다.\n\n주목할 점은, 기존 대의민주주의에서 흔히 발생하는 '당론 중심 토의'와 달리, 신민회 의견서가 의원 발언의 실질적 근거로 기능했다는 점입니다. AI 감사 결과 78%의 반영도를 기록하며 본회의 상정 기준(60%)을 상회했고, 특히 전세 사기 피해 예방·지역 균형 배분·재원 명시 등 시민 발의 조항들이 법안 초안에 그대로 수용되었습니다.\n\n신민회 모델은 대의민주주의를 대체하는 것이 아니라 시민의 숙의를 제도적 압력으로 전환하는 '심의민주주의 보완 장치'로 기능할 수 있음을 이번 시뮬레이션이 보여줍니다."
+  },
+  {
+    name:"AI 규제",bill:"인공지능 기본법 (가칭)",
+    speeches:[
+      {speaker:"강예진",age:"20대",region:"서울",job:"대학생",stance:"찬성",text:"AI가 채용 심사에 활용되는데 왜 탈락했는지 이유조차 알 수 없습니다. 알고리즘 결정에 대한 설명 요구권을 법으로 보장해야 합니다."},
+      {speaker:"이수연",age:"20대",region:"경기",job:"대학생",stance:"찬성",text:"딥페이크 피해자의 대다수가 20대 여성입니다. AI 생성물에 대한 워터마크 의무화와 유포 시 플랫폼 책임제를 명확히 해야 합니다."},
+      {speaker:"신다은",age:"30대",region:"대전",job:"직장인",stance:"조건부 찬성",text:"규제 강화에는 동의하지만 혁신 스타트업에 대한 예외 조항이 없으면 산업 경쟁력을 잃을 수 있습니다. 규모 기반 차등 규제 방식을 도입해야 합니다."},
+      {speaker:"임재원",age:"40대",region:"충북",job:"자영업자",stance:"우려",text:"AI 규제가 과도해지면 해외 플랫폼만 이득을 봅니다. 국내 기업에만 규제 부담이 집중되지 않도록 역외 적용 조항을 반드시 포함해야 합니다."},
+      {speaker:"장현우",age:"50대",region:"경북",job:"공무원",stance:"찬성",text:"공공 행정에서도 AI가 쓰이기 시작했습니다. 행정 처분에 AI가 개입했을 경우 이를 시민에게 고지하고 이의신청 절차를 별도로 마련해야 합니다."},
+      {speaker:"조민석",age:"60대",region:"경남",job:"무직",stance:"반대",text:"디지털 취약 계층 입장에서 AI 피해 구제 창구가 현실적으로 접근 가능한지 의문입니다. 오프라인 피해 신고 창구를 법에 명시해야 합니다."},
+      {speaker:"고유진",age:"20대",region:"대구",job:"프리랜서",stance:"조건부 찬성",text:"AI가 내 창작물을 학습 데이터로 무단 사용하는 것은 명백한 권리 침해입니다. 창작자 동의 없는 학습 데이터 수집을 금지하는 조항이 이 법안의 핵심이 되어야 합니다."}
+    ],
+    summary:"신민회 25인은 AI 기술 확산이 채용 차별, 딥페이크 피해, 창작권 침해, 행정 불투명성 등 다층적 권리 침해를 야기하고 있음을 공통적으로 인식하였다. 알고리즘 설명 요구권, AI 생성물 워터마크 의무화, 고위험 AI 사전 심사제, 디지털 취약 계층 보호 조항을 입법 필수 요소로 제시하는 한편, 스타트업 차등 규제와 역외 적용 조항을 통해 국내 산업 보호와 규제 균형을 도모할 것을 촉구한다.",
+    debates:[
+      {speaker:"이재명",party:"민주당",text:"신민회가 제기한 알고리즘 설명 요구권은 EU AI Act의 핵심 조항과 일치합니다. 채용·신용·의료 등 고위험 영역에서의 AI 결정에 대한 설명 의무를 법안 핵심 조항으로 명시하겠습니다."},
+      {speaker:"한동훈",party:"국민의힘",text:"신민회가 제안한 규모 기반 차등 규제 방식은 합리적입니다. 매출 500억 이상 기업에는 강한 의무를 부과하고 스타트업에는 샌드박스 면제를 허용하는 투트랙 방식을 지지합니다."},
+      {speaker:"조국",party:"조국혁신당",text:"딥페이크 피해와 창작권 침해는 즉각 입법이 필요한 영역입니다. AI 학습 데이터 수집 시 창작자 사전 동의 의무화, 플랫폼의 딥페이크 유통 방지 의무를 이번 법안에 구체적 조항으로 삽입해야 합니다."},
+      {speaker:"이준석",party:"개혁신당",text:"역외 적용 문제는 국제 통상 분쟁 소지가 있지만, 국내 기업 역차별 방지를 위한 '동등 규제 원칙' 조항은 반드시 포함되어야 한다는 신민회 의견에 동의합니다."},
+      {speaker:"강선우",party:"민주당",text:"공공 행정 AI 사용 시 고지 의무와 이의신청 절차 보장은 AI 기본법에 명시적 근거 조항을 두는 것이 실효성 면에서 더 강력합니다."},
+      {speaker:"권성동",party:"국민의힘",text:"사후 감독 강화 방식을 대안으로 제시합니다. 다만 신민회가 강조한 디지털 취약 계층 오프라인 구제 창구 설치는 비용 대비 효과가 크므로 찬성합니다."},
+      {speaker:"김민석",party:"민주당",text:"AI 윤리위원회를 독립 기관으로 설치하고 시민 대표를 포함시키는 방안이 필요합니다. 신민회처럼 무작위 추출 시민이 AI 감독 기구에 참여하는 구조 자체가 이 법안의 정신과 일치합니다."},
+      {speaker:"장동혁",party:"국민의힘",text:"처벌 조항의 상한선을 명확히 해 기업 예측 가능성을 확보해야 합니다. 신민회 의견 중 역외 적용과 차등 규제 원칙은 법안 조문화 단계에서 우선적으로 검토하겠습니다."}
+    ],
+    bill_draft:"알고리즘 결정에 대한 설명 요구권 보장, AI 생성물 워터마크 의무화, 고위험 AI 사전 심사제(매출 500억 이상 적용), 창작물 학습 데이터 사전 동의제, 디지털 취약 계층 오프라인 피해 구제 창구 설치를 핵심 내용으로 한다.",
+    audit:{score:82,keyword:77,semantic:87,pass:true,reason:"판정: ✓ 본회의 상정 가능\n\n신민회 의견서의 6대 핵심 요구 사항(설명 요구권, 워터마크 의무화, 차등 규제, 역외 적용, 행정 고지 의무, 취약 계층 보호) 중 5개가 의원 토의 및 법안 초안에 명시적으로 반영되었습니다. 역외 적용 조항은 '동등 규제 원칙'으로 수정 반영되었으며, 이는 신민회 의견의 취지를 실질적으로 구현한 것으로 판단됩니다."},
+    final_summary:"AI 규제 주제의 신민회 시뮬레이션에서는 25인 시민이 기술 피해 경험을 토대로 구체적이고 다층적인 입법 요구를 도출해냈습니다.\n\n특히 주목할 점은 '알고리즘 설명 요구권'과 '창작물 학습 동의제'처럼 전문가 중심 논의에서 자주 간과되는 권리 조항들이 시민 숙의를 통해 핵심 의제로 부상했다는 것입니다. AI 감사 결과 82%의 높은 반영도를 기록한 것은 의원 토의가 시민 의견을 단순 참고하는 수준을 넘어 법안 조문 설계에 직접 반영했기 때문입니다.\n\n신민회 모델은 고도로 기술적인 입법 영역에서도 시민의 생활 감각과 권리 감수성이 입법 과정에 실질적인 압력으로 작용할 수 있음을 보여줍니다."
+  },
+  {
+    name:"탄소세",bill:"탄소세 및 기후정의 전환 법안 (가칭)",
+    speeches:[
+      {speaker:"고유진",age:"20대",region:"대구",job:"프리랜서",stance:"찬성",text:"기후 위기의 피해는 미래 세대가 짊어지는데 결정권은 현세대가 갖고 있습니다. 탄소세 도입은 세대 간 정의의 문제이기도 합니다. 세수 전액을 기후 적응 기금으로 환류해야 합니다."},
+      {speaker:"이수연",age:"20대",region:"경기",job:"대학생",stance:"찬성",text:"탄소세를 내는 기업이 비용을 소비자 물가에 전가하면 결국 저소득층이 더 타격받습니다. 세수의 일정 비율을 탄소 취약 계층 에너지 보조금으로 환급하는 '탄소 배당' 방식을 반드시 포함해야 합니다."},
+      {speaker:"홍태양",age:"50대",region:"전북",job:"자영업자",stance:"반대",text:"자영업자나 중소기업은 에너지 비용 인상을 흡수할 여력이 없습니다. 대기업 중심으로만 탄소세를 부과하거나, 중소기업에는 10년 유예 기간을 줘야 합니다."},
+      {speaker:"정우성",age:"60대",region:"전남",job:"농업인",stance:"우려",text:"농업용 면세유가 폐지되거나 탄소세 대상에 포함되면 농가 경영이 무너집니다. 1차 산업에 대한 탄소세 면제 또는 전환 보조금을 법안에 명시해야 합니다."},
+      {speaker:"박민준",age:"50대",region:"부산",job:"자영업자",stance:"조건부 찬성",text:"탄소세 도입 자체는 필요하지만 속도가 중요합니다. 급격한 세율 인상이 아닌 5년 단위 단계적 인상 경로를 법안에 명시해야 산업계가 예측 가능하게 대응할 수 있습니다."},
+      {speaker:"문성준",age:"30대",region:"경기",job:"직장인",stance:"찬성",text:"한국은 G20 국가 중 탄소세가 없는 몇 안 되는 나라입니다. 국제 탄소국경조정제도(CBAM)가 시행되면 어차피 탄소 비용을 지불해야 하므로, 내부 탄소세로 선제 대응하는 것이 경제적으로도 유리합니다."},
+      {speaker:"류아영",age:"40대",region:"서울",job:"주부",stance:"조건부 찬성",text:"탄소세로 가정의 난방비와 전기요금이 오르면 서민 생계에 직접 영향을 줍니다. 저소득 가구에 대한 에너지 바우처 확대와 탄소세를 연동하는 구체적 보호 조항이 없으면 찬성하기 어렵습니다."}
+    ],
+    summary:"신민회 25인은 기후 위기 대응을 위한 탄소세 도입의 당위성에는 폭넓은 공감대를 형성하였으나, 중소기업·농업·저소득층에 대한 역진성 완화 장치 없이는 찬성할 수 없다는 입장이 다수를 이루었다. 구체적으로 탄소 배당 환급제, 중소기업 단계적 적용, 농업 면제 조항, 5년 단위 세율 인상 경로 명시, 저소득층 에너지 바우처 연동을 조건으로 제시하였다.",
+    debates:[
+      {speaker:"이재명",party:"민주당",text:"신민회가 제시한 탄소 배당 방식은 캐나다·스위스의 검증된 모델입니다. 탄소세 세수의 40%를 1인당 균등 배당하고, 나머지는 녹색 전환 산업 보조금으로 배분하는 이중 환류 구조를 법안에 명시하겠습니다."},
+      {speaker:"한동훈",party:"국민의힘",text:"탄소세가 기업 경쟁력을 훼손하지 않으려면 배출권 거래제와의 연계가 필수입니다. 기존 배출권 거래제 참여 기업에는 탄소세 이중 부과를 금지하고 중소기업 유예 기간을 7년으로 설정하는 방안을 지지합니다."},
+      {speaker:"조국",party:"조국혁신당",text:"신민회가 강조한 세대 간 정의 관점은 입법 취지 전문에 반드시 포함되어야 합니다. 탄소 예산제를 도입해 연도별 배출 상한선을 법제화하고, 이를 초과하면 자동으로 탄소세율이 인상되는 연동 조항을 추가해야 합니다."},
+      {speaker:"이준석",party:"개혁신당",text:"5년 단위 단계적 인상 경로는 신민회 의견 중 가장 현실적인 제안입니다. 초기 세율을 낮게 설정하고 5년마다 국회 재심의를 거쳐 인상 여부를 결정하는 방식이 최선입니다."},
+      {speaker:"강선우",party:"민주당",text:"농업 부문 면세 조항은 신민회 의견을 적극 수용합니다. 농업 탄소 감축 실적에 따라 세금을 환급하는 '농업 탄소 크레딧' 제도를 도입하면 감축 유인도 함께 설계할 수 있습니다."},
+      {speaker:"권성동",party:"국민의힘",text:"탄소세 세수 내에서 저소득층 에너지 지원 비율을 의무 비율로 고정하는 방식이 재정 건전성을 유지하면서 신민회 요구를 수용하는 방법입니다."},
+      {speaker:"김민석",party:"민주당",text:"CBAM 대응 측면에서 선제적 탄소세 도입의 경제적 합리성은 충분히 입증됩니다. 무역통상부와 협력해 탄소 국경세 수입 일부를 국내 탄소세 세수로 전환하는 조약 협상을 병행할 것을 제안합니다."},
+      {speaker:"장동혁",party:"국민의힘",text:"법률에 최저·최고 세율 범위를 명시하고 그 안에서 정부가 결정하도록 하는 방식이 안정성과 유연성을 동시에 확보합니다. 신민회 의견의 핵심 조건들은 모두 조문화 단계에서 반영하겠습니다."}
+    ],
+    bill_draft:"온실가스 배출량에 비례한 탄소세를 부과하되 중소기업 7년 유예, 농업 탄소 크레딧 적용, 세수의 40%를 1인당 탄소 배당으로 환급, 나머지를 녹색 전환 보조금 및 저소득층 에너지 바우처로 배분하며, 5년 단위 세율 재심의 조항을 포함한다.",
+    audit:{score:85,keyword:80,semantic:90,pass:true,reason:"판정: ✓ 본회의 상정 가능\n\n신민회 의견서의 5대 조건(탄소 배당 환급제, 중소기업 단계적 적용, 농업 면제·크레딧, 5년 세율 인상 경로, 저소득층 에너지 바우처 연동) 전항이 의원 토의에서 구체적으로 논의되었고 법안 초안에 모두 반영되었습니다. 특히 '역진성 완화'라는 신민회의 핵심 프레임이 이중 환류 구조 설계의 근거로 직접 인용되었습니다."},
+    final_summary:"탄소세 주제 신민회 시뮬레이션에서는 기후 정책 특유의 갈등 구조—환경 목표 vs. 산업 부담, 현세대 이익 vs. 미래 세대 권리—가 25인 숙의 과정에서 명시적으로 드러났습니다.\n\n특히 농업인과 자영업자 참여자들이 제기한 역진성 우려가 '탄소 배당'과 '에너지 바우처 연동'이라는 구체적 보호 조항으로 의원 토의에 직접 반영된 것은, 정책 전문가 중심 논의에서 흔히 간과되는 계층별 영향 분석이 시민 숙의를 통해 입법 과정에 통합된 사례입니다.\n\nAI 감사 점수 85%는 이번 시뮬레이션 3개 주제 중 가장 높은 반영도로, 복잡한 이해관계가 얽힌 주제일수록 신민회 모델의 다층 대표성이 입법의 질을 높이는 데 효과적임을 시사합니다."
+  }
+];
+
+let sel=-1, phase=0;
+
+function setPhase(n){
+  phase=n;
+  for(let i=0;i<6;i++){
+    const el=document.getElementById('ph'+i);
+    el.classList.remove('active','done');
+    if(i<n) el.classList.add('done');
+    else if(i===n) el.classList.add('active');
+    document.getElementById('s'+i).classList.toggle('on', i===n);
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function pick(i){
+  sel=i;
+  document.querySelectorAll('.topic-btn').forEach((b,j)=>b.classList.toggle('sel',j===i));
+  const btn=document.getElementById('startBtn');
+  btn.disabled=false;
+  btn.innerHTML=`<i class="ti ti-player-play"></i>"${T[i].name}" 주제로 시뮬레이션 시작`;
+}
+
+function goPhase1(){
+  setPhase(1);
+  const grid=document.getElementById('citGrid');
+  grid.innerHTML='';
+  CITIZENS.forEach((c,i)=>{
+    const ac=AV[i%AV.length];
+    const d=document.createElement('div');
+    d.className='cit-card';
+    d.style.animationDelay=(i*.06)+'s';
+    d.innerHTML=`<div class="cit-av" style="background:${ac.bg};color:${ac.fg};">${c.name[0]}${c.name[1]}</div><div class="cit-name">${c.name}</div><div class="cit-info">${c.age}·${c.region}</div><div class="cit-info">${c.job}</div>`;
+    grid.appendChild(d);
+  });
+  setTimeout(()=>{ document.getElementById('btn1').disabled=false; }, 1800);
+}
+
+function goPhase2(){
+  setPhase(2);
+  const topic=T[sel];
+  const spList=document.getElementById('spList');
+  spList.innerHTML='';
+  document.getElementById('spBadge').textContent='생성 중...';
+  document.getElementById('sumCard').style.display='none';
+  document.getElementById('btn2').style.display='none';
+
+  topic.speeches.forEach((sp,i)=>{
+    setTimeout(()=>{
+      const sc=sp.stance==='찬성'?'g':sp.stance==='반대'?'r':'a';
+      const d=document.createElement('div');
+      d.className='speech cs';
+      d.innerHTML=`<div class="sp-head"><i class="ti ti-user"></i><strong>${sp.speaker}</strong><span class="badge ${sc}">${sp.stance}</span><span>${sp.age}·${sp.region}·${sp.job}</span></div><div class="sp-text"></div>`;
+      spList.appendChild(d);
+      typeText(d.querySelector('.sp-text'), sp.text, 12, ()=>{
+        if(i===topic.speeches.length-1){
+          document.getElementById('spBadge').textContent=`${topic.speeches.length}건 발언`;
+          showSummary(topic);
+        }
+      });
+    }, i*650);
+  });
+}
+
+function showSummary(topic){
+  const card=document.getElementById('sumCard');
+  card.style.display='block';
+  const el=document.getElementById('sumText');
+  el.className='stream cur';
+  typeText(el, '【신민회 공식 의견서】\n\n'+topic.summary, 14, ()=>{
+    el.className='stream';
+    document.getElementById('btn2').style.display='flex';
+    document.getElementById('btn2').disabled=false;
+  });
+}
+
+function goPhase3(){
+  setPhase(3);
+  const topic=T[sel];
+  const mpGrid=document.getElementById('mpGrid');
+  mpGrid.innerHTML='';
+  topic.debates.forEach((d,i)=>{
+    const color=PARTIES[d.party]||'#888';
+    const card=document.createElement('div');
+    card.className='mp-card';
+    card.style.animationDelay=(i*.08)+'s';
+    card.innerHTML=`<span class="mp-dot" style="background:${color};"></span><div class="mp-name">${d.speaker}</div><div class="mp-party">${d.party}</div>`;
+    mpGrid.appendChild(card);
+  });
+
+  const debList=document.getElementById('debList');
+  debList.innerHTML='';
+  document.getElementById('btn3').style.display='none';
+
+  topic.debates.forEach((d,i)=>{
+    setTimeout(()=>{
+      const color=PARTIES[d.party]||'#888';
+      const el=document.createElement('div');
+      el.className='speech ms';
+      el.innerHTML=`<div class="sp-head"><span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0;"></span><strong>${d.speaker}</strong><span>${d.party}</span></div><div class="sp-text"></div>`;
+      debList.appendChild(el);
+      typeText(el.querySelector('.sp-text'), d.text, 10, ()=>{
+        if(i===topic.debates.length-1){
+          const note=document.createElement('div');
+          note.className='draft-note';
+          note.innerHTML=`<strong>법안 초안</strong><br>${topic.bill_draft}`;
+          debList.appendChild(note);
+          document.getElementById('btn3').style.display='flex';
+          document.getElementById('btn3').disabled=false;
+        }
+      });
+    }, i*720);
+  });
+}
+
+function goPhase4(){
+  setPhase(4);
+  const a=T[sel].audit;
+  document.getElementById('btn4').style.display='none';
+  setTimeout(()=>{
+    document.getElementById('aScore').textContent=a.score+'%';
+    document.getElementById('aKw').textContent=a.keyword+'%';
+    document.getElementById('aSem').textContent=a.semantic+'%';
+    document.getElementById('aPct').textContent=a.score+'%';
+    const bar=document.getElementById('aBar');
+    bar.className='meter-fill '+(a.pass?'pass':'fail');
+    setTimeout(()=>{ bar.style.width=a.score+'%'; }, 150);
+    const el=document.getElementById('aReason');
+    el.className='stream cur';
+    typeText(el, a.reason, 18, ()=>{
+      el.className='stream';
+      document.getElementById('btn4').style.display='flex';
+      document.getElementById('btn4').disabled=false;
+    });
+  }, 600);
+}
+
+function goPhase5(){
+  setPhase(5);
+  const topic=T[sel];
+  const pass=topic.audit.pass;
+  document.getElementById('finalBox').innerHTML=pass
+    ?`<div class="result-box pass"><div class="ri">⚖️</div><div class="rt">본회의 상정 가결</div><div class="rd">AI 감사 결과 신민회 의견이 충분히 반영되었습니다 (${topic.audit.score}% ≥ 60%).<br>「${topic.bill}」이(가) 국회 본회의 상정 단계로 진행됩니다.</div></div>`
+    :`<div class="result-box fail"><div class="ri">🚫</div><div class="rt">본회의 상정 불가</div><div class="rd">AI 감사 결과 시민 의견 반영이 미흡합니다 (${topic.audit.score}% &lt; 60%).<br>신민회의원회의가 재소집됩니다. 3회 연속 부결 시 시민 징계 투표가 발동됩니다.</div></div>`;
+  const el=document.getElementById('finalText');
+  el.className='stream cur';
+  typeText(el, topic.final_summary, 14, ()=>{ el.className='stream'; });
+}
+
+function typeText(el, text, speed, cb){
+  el.textContent='';
+  let i=0;
+  const t=setInterval(()=>{
+    if(i<text.length){ el.textContent+=text[i++]; }
+    else{ clearInterval(t); if(cb) cb(); }
+  }, speed);
+}
+
+function reset(){
+  sel=-1;
+  document.querySelectorAll('.topic-btn').forEach(b=>b.classList.remove('sel'));
+  const sb=document.getElementById('startBtn');
+  sb.disabled=true;
+  sb.innerHTML='<i class="ti ti-player-play"></i>주제를 선택해 시작하기';
+  ['citGrid','spList','mpGrid','debList','finalBox'].forEach(id=>{ document.getElementById(id).innerHTML=''; });
+  ['sumText','aReason','finalText'].forEach(id=>{ document.getElementById(id).textContent=''; });
+  document.getElementById('sumCard').style.display='none';
+  document.getElementById('aScore').textContent='—';
+  document.getElementById('aKw').textContent='—';
+  document.getElementById('aSem').textContent='—';
+  document.getElementById('aPct').textContent='0%';
+  document.getElementById('aBar').style.width='0%';
+  setPhase(0);
+}
+</script>
+</body>
+</html>
